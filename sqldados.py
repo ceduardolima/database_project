@@ -1,49 +1,74 @@
-from sqlite3 import *
+from pymysql import *
 
-banco = 'dados.db'
+banco = 'dados'
 class SqLite:
     def __init__(self, master=banco):
-        self.con = connect(master)
+        self.master = master
+        self.con = connect(host='localhost', user='root', passwd='')
         self.cur = self.con.cursor()
+        self.cur.execute(f"USE {self.master}") 
 
-    def _print(self):
+    def confirmarAcaoRealizada(self):
+        """Printa mensagem quando alguma ação foi realizada sem Erro"""
         print(">> Ação realizada com sucesso <<", end='\n\n')
     
-    def print_error(self, local, err):
+    def printError(self, local, err):
+        """Printa o Erro ocorrido"""
         print(f">> Error ({local}): {err}")
 
-    def fechar(self):
+    def fecharConexao(self):
+        """Fecha a conexao com o banco de dados"""
         self.con.close()
-    
-    def adicionar(self, tabela, valores):
-        try:
-            self.cur.execute(f"INSERT INTO {tabela} VALUES {valores}")
-            _print()
-        except Error as err: print_error('adicionar, err')
-        self.con.commit()
 
-    def remover(self, tabela, condicao):
-        try:
-            self.cur.execute(f"DELETE FROM {tabela} WHERE {condicao}")
-            _print()
-        except Error as err: print_error('remover', err)
-        self.con.commit()
+    def formatandoDados(self, dadosRecebidos):
+        """Ajusta a entrada de dados para tabelas q possuem id auto_increment"""
+        dadosFormatados = "(DEFAULT"
+        for dado in dadosRecebidos:
+            formatacao = f",'{dado}'"
+            dadosFormatados = dadosFormatados + formatacao
+        return dadosFormatados + ")"
+
+    def DadosRecebidosDoUsuario(self, dadosInseridos, condicaoDeSaida=True):
+        """Retorna os dados organizados para a função que irá ser executada\
+            condicaoDeSaida == True -> Usado para adicionar dados na tabela\
+            condicaoDeSaida == False -> Usado para fazer o update de uma tabela"""
+        if condicaoDeSaida: return dadosInseridos
+        elif condicaoDeSaida==False:
+            coluna, valorColuna = dadosInseridos[0], dadosInseridos[1]
+            return zip(coluna, valorColuna)
     
-    def atualizar(self, tabela, valores, condicao):
-        print(valores, condicao)
-        for n in range(len(valores)):
-            try:
-                self.cur.execute(f"UPDATE {tabela} SET {valores[n][0]}='{valores[n][1]}' WHERE {condicao[0]}='{condicao[1]}'")
-                _print()
-            except Error as err: print_error('atualizar', err)
+    def adicionarDadosNasTabelas(self, tabelaInserida, valoresParaAdicionar):
+        """Adiciona os dados inseridos nas tabela indicada pelo usuario"""
+        self.cur.execute(f"INSERT INTO {tabelaInserida} VALUES {valoresParaAdicionar}")
+        self.con.commit()
+        self.confirmarAcaoRealizada()
+
+    def atualizarTabela(self, tabela, colunasEvaloresAtualizados, especificando):
+        colunaEspecificada, valorColuna = especificando
+        try:
+            for atualizacoes in colunasEvaloresAtualizados:
+                coluna, valor = atualizacoes
+                print(coluna, valor)
+                self.cur.execute(f"UPDATE {tabela} SET {coluna}='{valor}' WHERE {colunaEspecificada}={valorColuna}")
             self.con.commit()
-
-    def printar_tabelas(self):
-        self.cur.execute("SELECT tbl_name FROM sqlite_master WHERE type = 'table'")
-        tabelas = self.cur.fetchall() 
-        [print(nome, end=' ') for nome in tabelas]
+            self.confirmarAcaoRealizada()
+        except Error as err: self.printError('atualizar', Error)
     
-    def printar_valores(self, tabela):
+    def obterDadosDatabela(self, tabela):
         self.cur.execute(f"SELECT * FROM {tabela}")
-        valores = self.cur.fetchall()
-        [print(valores[n]) for n in range(len(valores))]
+        return self.cur.fetchall()
+
+    def printarDadosDaTabela(self, dadosTabela):
+        for dado in dadosTabela:
+            print("\n", "------------------------------------------")
+            [print(f"--{dado[quantidade]}", end="") for quantidade in range(len(dado))]
+        
+    def apagarDadosDaTabela(self, tabela, dadosRecebidos):
+        coluna, valorColuna = dadosRecebidos
+        try:
+            self.cur.execute(f"DELETE FROM {tabela} WHERE {coluna}={valorColuna}")
+            self.con.commit()
+            self.confirmarAcaoRealizada()
+        except: self.printError('apagarDadosDaTabela', Error)
+
+
