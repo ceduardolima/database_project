@@ -4,22 +4,21 @@ class MenuInicial():
     def __init__(self):
         self.usuario = None
         self.senha = None
-        self.cpf = None
-    
-    def introMenu(self):
-        print("l -> Login")
-        print("c -> Cadastro")
-    
-    def cadastro(self):
-        self.usuario = input("Insira o nome de usuario: ")
-        self.senha = input("Insira uma senha: ")
-        self.cpf = input("Insira seu cpf: ")
-        dadosCadastro = (self.usuario, self.senha, self.cpf)
-        banco = SqLite()
-        dadosCadastroFormatado = banco.formatandoDados(dadosCadastro)
-        banco.AdicionandoCadatro(dadosCadastroFormatado)
-        banco.fecharConexao()
+        self.rootId = 2
+        self.banco = SqLite()
 
-menu = MenuInicial()
-menu.cadastro()
+    def Login(self):
+        self.usuario = int(input("ID: "))
+        self.senha = input("Senha: ")
+        tabelaFuncionarios = self.banco.obterDadosDatabela('funcionarios')
+        identificacao, senha = tabelaFuncionarios[0], tabelaFuncionarios[3]
+
+        if self.usuario == self.rooId and self.senha == senha:
+            pass
+        
+        elif self.usuario is not self.rootId and self.usuario == identificacao and self.senha == senha:
+            pass
+
+
+
 
