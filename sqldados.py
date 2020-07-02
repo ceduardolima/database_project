@@ -19,6 +19,13 @@ class SqLite:
     def fecharConexao(self):
         """Fecha a conexao com o banco de dados"""
         self.con.close()
+    
+    def AdicionandoCadatro(self, infoCadastro):
+        try:
+            self.cur.execute(f"INSERT INTO funcionarios (id, nome, senha, cpf) VALUES {infoCadastro}")
+            self.con.commit()
+            self.confirmarAcaoRealizada()
+        except: self.printError('cadastro', Error)
 
     def formatandoDados(self, dadosRecebidos):
         """Ajusta a entrada de dados para tabelas q possuem id auto_increment"""
@@ -28,15 +35,6 @@ class SqLite:
             dadosFormatados = dadosFormatados + formatacao
         return dadosFormatados + ")"
 
-    def DadosRecebidosDoUsuario(self, dadosInseridos, condicaoDeSaida=True):
-        """Retorna os dados organizados para a função que irá ser executada\
-            condicaoDeSaida == True -> Usado para adicionar dados na tabela\
-            condicaoDeSaida == False -> Usado para fazer o update de uma tabela"""
-        if condicaoDeSaida: return dadosInseridos
-        elif condicaoDeSaida==False:
-            coluna, valorColuna = dadosInseridos[0], dadosInseridos[1]
-            return zip(coluna, valorColuna)
-    
     def adicionarDadosNasTabelas(self, tabelaInserida, valoresParaAdicionar):
         """Adiciona os dados inseridos nas tabela indicada pelo usuario"""
         self.cur.execute(f"INSERT INTO {tabelaInserida} VALUES {valoresParaAdicionar}")
@@ -44,6 +42,7 @@ class SqLite:
         self.confirmarAcaoRealizada()
 
     def atualizarTabela(self, tabela, colunasEvaloresAtualizados, especificando):
+        agrupandoColunasValores = zip(colunasEvaloresAtualizados[0], colunasEvaloresAtualizados[1])
         colunaEspecificada, valorColuna = especificando
         try:
             for atualizacoes in colunasEvaloresAtualizados:
@@ -70,5 +69,4 @@ class SqLite:
             self.con.commit()
             self.confirmarAcaoRealizada()
         except: self.printError('apagarDadosDaTabela', Error)
-
 
