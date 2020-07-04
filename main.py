@@ -1,24 +1,14 @@
-from sqldados import *
+from janelas import *
 
-class MenuInicial():
-    def __init__(self):
-        self.usuario = None
-        self.senha = None
-        self.rootId = 2
-        self.banco = SqLite()
+def admMostrarTabelas(admClasse):
+    tabelaRequisitada = admClasse.informandoTabelas()
+    if tabelaRequisitada == 'c': admClasse.informacoesClientes()
+    if tabelaRequisitada == 'e': admClasse.informacoesEstoque()
+    if tabelaRequisitada == 'f': admClasse.informacoesFuncionarios()
 
-    def Login(self):
-        self.usuario = int(input("ID: "))
-        self.senha = input("Senha: ")
-        tabelaFuncionarios = self.banco.obterDadosDatabela('funcionarios')
-        identificacao, senha = tabelaFuncionarios[0], tabelaFuncionarios[3]
-
-        if self.usuario == self.rooId and self.senha == senha:
-            pass
-        
-        elif self.usuario is not self.rootId and self.usuario == identificacao and self.senha == senha:
-            pass
-
-
-
-
+adm = PaginaAdm()
+while True:
+    comandoRecebido = adm.informandoComando()
+    if comandoRecebido == 'c': adm.informacoesParaCadastro()
+    if comandoRecebido == 't': admMostrarTabelas(adm)
+    if comandoRecebido == 's': break

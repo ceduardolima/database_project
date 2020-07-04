@@ -1,4 +1,4 @@
-from pymysql import *
+from pymysql import (connect, cursors, Error)
 
 banco = 'dados'
 class SqLite:
@@ -22,7 +22,7 @@ class SqLite:
     
     def AdicionandoCadatro(self, infoCadastro):
         try:
-            self.cur.execute(f"INSERT INTO funcionarios (id, nome, senha, cpf) VALUES {infoCadastro}")
+            self.cur.execute(f"INSERT INTO funcionarios (id, nome, cpf, senha) VALUES {infoCadastro}")
             self.con.commit()
             self.confirmarAcaoRealizada()
         except: self.printError('cadastro', Error)
@@ -42,7 +42,7 @@ class SqLite:
         self.confirmarAcaoRealizada()
 
     def atualizarTabela(self, tabela, colunasEvaloresAtualizados, especificando):
-        agrupandoColunasValores = zip(colunasEvaloresAtualizados[0], colunasEvaloresAtualizados[1])
+        """Faz o update da tabela escolhida"""
         colunaEspecificada, valorColuna = especificando
         try:
             for atualizacoes in colunasEvaloresAtualizados:
@@ -59,8 +59,8 @@ class SqLite:
 
     def printarDadosDaTabela(self, dadosTabela):
         for dado in dadosTabela:
-            print("\n", "------------------------------------------")
             [print(f"--{dado[quantidade]}", end="") for quantidade in range(len(dado))]
+            print("\n", "------------------------------------------")
         
     def apagarDadosDaTabela(self, tabela, dadosRecebidos):
         coluna, valorColuna = dadosRecebidos
