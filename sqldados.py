@@ -47,7 +47,6 @@ class SqLite:
         try:
             for atualizacoes in colunasEvaloresAtualizados:
                 coluna, valor = atualizacoes
-                print(coluna, valor)
                 self.cur.execute(f"UPDATE {tabela} SET {coluna}='{valor}' WHERE {colunaEspecificada}={valorColuna}")
             self.con.commit()
             self.confirmarAcaoRealizada()
