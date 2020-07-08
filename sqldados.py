@@ -7,40 +7,52 @@ class SqLite:
         self.con = connect(host='localhost', user='root', passwd='')
         self.cur = self.con.cursor()
         self.cur.execute(f"USE {self.master}") 
-
-    def confirmarAcaoRealizada(self):
-        """Printa mensagem quando alguma ação foi realizada sem Erro"""
-        print(">> Ação realizada com sucesso <<", end='\n\n')
     
-    def printError(self, local, err):
+    @staticmethod
+    def printError(local, err):
         """Printa o Erro ocorrido"""
         print(f">> Error ({local}): {err}")
+
+    @staticmethod
+    def formatandoEntradaUnica(dado):
+        try: 
+            if int(dado): return dado
+        except ValueError: return "'" + dado + "'"
+
+    @staticmethod
+    def formatandoDados(dadosRecebidos):
+        """Ajusta a entrada de dados para tabelas q possuem id auto_increment"""
+        dadosFormatados = "(DEFAULT"
+        for dado in dadosRecebidos:
+            if dado == 'DEFAULT': formatacao = ", DEFAULT"
+            else: formatacao = f",'{dado}'"
+            dadosFormatados = dadosFormatados + formatacao
+        return dadosFormatados + ")"
+    
+    @staticmethod
+    def printarDadosDaTabela(dadosTabela):
+        for dado in dadosTabela:
+            [print(f"--{dado[quantidade]}", end="") for quantidade in range(len(dado))]
+            print("\n", "------------------------------------------")
 
     def fecharConexao(self):
         """Fecha a conexao com o banco de dados"""
         self.con.close()
     
     def AdicionandoCadatro(self, infoCadastro):
+        """Faz o cadastro dos funcionarios"""
         try:
             self.cur.execute(f"INSERT INTO funcionarios (id, nome, cpf, senha) VALUES {infoCadastro}")
             self.con.commit()
-            self.confirmarAcaoRealizada()
+            return True
         except: self.printError('cadastro', Error)
-
-    def formatandoDados(self, dadosRecebidos):
-        """Ajusta a entrada de dados para tabelas q possuem id auto_increment"""
-        dadosFormatados = "(DEFAULT"
-        for dado in dadosRecebidos:
-            formatacao = f",'{dado}'"
-            dadosFormatados = dadosFormatados + formatacao
-        return dadosFormatados + ")"
 
     def adicionarDadosNasTabelas(self, tabelaInserida, valoresParaAdicionar):
         """Adiciona os dados inseridos nas tabela indicada pelo usuario"""
         self.cur.execute(f"INSERT INTO {tabelaInserida} VALUES {valoresParaAdicionar}")
         self.con.commit()
-        self.confirmarAcaoRealizada()
-
+        return True
+     
     def atualizarTabela(self, tabela, colunasEvaloresAtualizados, especificando):
         """Faz o update da tabela escolhida"""
         colunaEspecificada, valorColuna = especificando
@@ -49,23 +61,25 @@ class SqLite:
                 coluna, valor = atualizacoes
                 self.cur.execute(f"UPDATE {tabela} SET {coluna}='{valor}' WHERE {colunaEspecificada}={valorColuna}")
             self.con.commit()
-            self.confirmarAcaoRealizada()
+            return True
         except Error as err: self.printError('atualizar', Error)
     
     def obterDadosDatabela(self, tabela):
+        """Pega os dados de uma tabela escolhida"""
         self.cur.execute(f"SELECT * FROM {tabela}")
         return self.cur.fetchall()
 
-    def printarDadosDaTabela(self, dadosTabela):
-        for dado in dadosTabela:
-            [print(f"--{dado[quantidade]}", end="") for quantidade in range(len(dado))]
-            print("\n", "------------------------------------------")
+    def procurarPor(self, tabela, nomeColuna, valorColuna):
+        self.cur.execute(f"SELECT * FROM {tabela} WHERE {nomeColuna}={valorColuna}")
+        return self.cur.fetchall()
         
     def apagarDadosDaTabela(self, tabela, dadosRecebidos):
+        """Apaga os dados de uma tabela"""
         coluna, valorColuna = dadosRecebidos
         try:
             self.cur.execute(f"DELETE FROM {tabela} WHERE {coluna}={valorColuna}")
             self.con.commit()
-            self.confirmarAcaoRealizada()
+            return True
         except: self.printError('apagarDadosDaTabela', Error)
+
 

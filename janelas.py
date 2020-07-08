@@ -3,8 +3,9 @@ from sqldados import *
 ROOT = 2
 FUNCIONARIO = 3
 
-class MenuInicial():
-    def __init__(self, banco=SqLite()):
+class MenuInicial(SqLite):
+    def __init__(self):
+        super.__init__()
         self.usuario = None
         self.senha = None
         self.rootId = 2
@@ -27,7 +28,8 @@ class PaginaAdm(SqLite):
     def __init__(self):
         super().__init__()
     
-    def informandoComando(self):
+    @staticmethod
+    def informandoComando():
         print(">> Pagina do Administrador <<")
         print("c -> Cadastrar algum funcionario")
         print("m -> Manipular dos dados de alguma tabela")
@@ -35,7 +37,8 @@ class PaginaAdm(SqLite):
         inputComando = input("> Comando: ")
         return inputComando
     
-    def informandoTabelas(self):
+    @staticmethod
+    def informandoTabelas():
         print(">> Tabelas <<")
         print("c -> Clientes")
         print("e -> Estoque")
@@ -66,3 +69,32 @@ class PaginaAdm(SqLite):
         senhaFuncionario = input("Senha: ")
         dadosFormatados = self.formatandoDados((nomeFuncionario, cpf_Funcionario, senhaFuncionario))
         self.AdicionandoCadatro(dadosFormatados)
+
+class Funcionario(SqLite):
+    def __init__(self):
+        super().__init__()
+
+    def cadastroCliente(self):
+        coluna = ('nome', 'cpf', 'celular1', 'celular2', 'cep', 'cidade', 'bairro')
+        valores = []
+        for n in range(len(coluna)):
+            print(coluna[n])
+            entrada = input()
+            if entrada == '': valores.append('DEFAULT')
+            else: valores.append(entrada)
+        valorFomatado = self.formatandoDados(valores)
+        self.adicionarDadosNasTabelas('clientes', valorFomatado)
+    
+    def pesquisarPorPeca(self, nomePeca, valor):
+        valor = self.formatandoEntradaUnica(valor)
+        print(valor)
+        pecas = self.procurarPor('estoque', nomePeca, valor)
+        for peca in pecas:
+            print(f"---------- Peça ----------")
+            print(f"id = {peca[0]}")
+            print(f"Nome = {peca[1]}")
+            print(f"Fornecedor = {peca[2]}")
+            print(f"Qunatidade = {peca[3]}")
+            print(f"Estoque = {peca[4]}")
+            print(f"Valor = {peca[5]}")
+
