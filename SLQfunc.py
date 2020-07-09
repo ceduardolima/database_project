@@ -1,5 +1,5 @@
 from pymysql import (connect, cursors, Error)
-
+from datetime import datetime
 class SQL:
     num_connection = 0
 
@@ -34,11 +34,24 @@ class SQL:
         SQL.num_connection -= 1
 
     def _fetchdada(self, table):
+        """Fetch all data"""
         self.cursor.execute(f"SELECT * FROM {table}")
         return self.cur.fetchall()
     
+    def _fetchdata_condition(self, table, column, value):
+        """Fetch the specific data"""
+        self.cursor.execute(f"SELECT * {table} WHERE {column}='{table}'")
+        return self.cursor.fetchall()
+    
+    @staticmethod
+    def _transformtodate(date):
+        """Transform the type: str -> datetime"""
+        date = date.split("/")
+        return datetime(day=int(date[0]), month=int(date[1]), year=int(date[2]))
+    
     @staticmethod
     def _strcreation(str_list):
+        """Create a str type with sql formating"""
         new_str = "("
         for value in str_list[:-1]:
             if value == 'DEFAULT':
@@ -49,7 +62,7 @@ class SQL:
 
     @staticmethod
     def _defaultadd(values, firstdefault=True):
-        """Create a String without '' on the default
+        """Return a list with DEFAULT where had ''
                 firstdefault == True -> use for table that have the primary key
                 firstdefault == False -> use for table that dont have the primary key"""
         if firstdefault: values.insert(0 ,"DEFAULT") 
@@ -60,24 +73,25 @@ class SQL:
         return new_list
 
     def addvalues(self, table, values):
-        """Add a new value on the select table"""
+        """Add a new value in the selected table"""
         sql_string = self._strcreation(self._defaultadd(values))    
         print(sql_string)    
         self.cursor.execute(f"INSERT INTO {table} VALUES {sql_string}")
         self.conn.commit()
 
     def updatevalues(self, table, columns, values, conditions):
-        """Updatethe values in the table"""
+        """Update the values in the table"""
         sql_lista = self._defaultadd(values, firstdefault=False)
         for n in range(len(columns)):
             self.cursor.execute(f"UPDATE {table} SET {columns[n]}='{sql_lista[n]}' WHERE {conditions[0]}='{conditions[1]}'")
         self.conn.commit()
     
-    def prt_alltable(self, table):
-        alldata = self._fetchdada(table)
+    def prt_data(self, table, alldata):
+        """Print the recieved data"""
         for data in alldata:
             [print(element) for element in data]
             print('------------------')
+        
 
         
 
@@ -86,4 +100,4 @@ class SQL:
 
 
 sql = SQL('dados', 'localhost', 'root', '')
-sql.updatevalues('estoque', ['nome', 'estoque'], ['pq1', 'p0p6'], ['id', '6'])
+sql._transformtodate("10/10/2000")
