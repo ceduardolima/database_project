@@ -86,18 +86,12 @@ class SQL:
             self.cursor.execute(f"UPDATE {table} SET {columns[n]}='{sql_lista[n]}' WHERE {conditions[0]}='{conditions[1]}'")
         self.conn.commit()
     
+    def deletevalue(self, table, idnumber):
+        self.cur.execute(f"DELETE FROM {table} WHERE id='{idnumber}'")
+        self.conn.commit()
+    
     def prt_data(self, table, alldata):
         """Print the recieved data"""
         for data in alldata:
             [print(element) for element in data]
             print('------------------')
-        
-
-        
-
-
-
-
-
-sql = SQL('dados', 'localhost', 'root', '')
-sql._transformtodate("10/10/2000")
