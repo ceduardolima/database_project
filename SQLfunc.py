@@ -28,7 +28,7 @@ class SQL:
             self.cursor.execute(f"USE {self.data_name}")
         except:  print(">> Error: ConnectionError")
     
-    def closeconnectio(self):
+    def closeconnection(self):
         """Close the connection"""
         self.conn.close()
         SQL.num_connection -= 1
@@ -91,7 +91,7 @@ class SQL:
         self.conn.commit()
     
     def prt_data(self, table, alldata):
-        """Print the recieved data"""
+        """Print the received data"""
         for data in alldata:
             [print(element) for element in data]
             print('------------------')
